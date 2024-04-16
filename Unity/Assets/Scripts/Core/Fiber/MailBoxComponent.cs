@@ -10,6 +10,7 @@
             Fiber fiber = self.Fiber();
             self.MailBoxType = mailBoxType;
             self.ParentInstanceId = self.Parent.InstanceId;
+            //看不懂，这里表示一个fiber,MailBoxComponent可以很多个？
             fiber.Mailboxes.Add(self);
         }
         

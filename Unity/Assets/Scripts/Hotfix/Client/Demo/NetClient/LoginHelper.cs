@@ -4,14 +4,19 @@ namespace ET.Client
     {
         public static async ETTask Login(Scene root, string account, string password)
         {
-            root.RemoveComponent<ClientSenderComponent>();
-            
-            ClientSenderComponent clientSenderComponent = root.AddComponent<ClientSenderComponent>();
-            
-            long playerId = await clientSenderComponent.LoginAsync(account, password);
 
-            root.GetComponent<PlayerComponent>().MyId = playerId;
-            
+            root.RemoveComponent<ClientSenderComponent>();
+            ClientSenderComponent clientSenderComponent = root.AddComponent<ClientSenderComponent>();
+
+            NetClient2Main_Login response = await clientSenderComponent.LoginAsync(account, password);
+
+            if (response.Error!=ErrorCode.ERR_Success)
+            {
+                Log.Error($"response.Error: {response.Error}");
+                return;
+            }
+            root.GetComponent<PlayerComponent>().MyId = response.PlayerId;
+
             await EventSystem.Instance.PublishAsync(root, new LoginFinish());
         }
     }

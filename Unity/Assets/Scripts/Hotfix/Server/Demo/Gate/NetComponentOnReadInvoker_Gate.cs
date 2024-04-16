@@ -59,6 +59,7 @@ namespace ET.Server
                     }
                     break;
                 }
+                //看不懂 这里是不是要加代码
                 case IRequest actorRequest:  // 分发IActorRequest消息，目前没有用到，需要的自己添加
                 {
                     break;

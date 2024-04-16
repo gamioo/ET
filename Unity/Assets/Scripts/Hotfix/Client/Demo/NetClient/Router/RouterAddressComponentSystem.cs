@@ -14,6 +14,7 @@ namespace ET.Client
         {
             self.RouterManagerHost = address;
             self.RouterManagerPort = port;
+            Log.Debug($"RouterManager, {self.RouterManagerHost}:{self.RouterManagerPort}");
         }
         
         public static async ETTask Init(this RouterAddressComponent self)

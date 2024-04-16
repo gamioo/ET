@@ -11,6 +11,7 @@ namespace ET
         private static void Awake(this NetComponent self, IPEndPoint address, NetworkProtocol protocol)
         {
             self.AService = new KService(address, protocol, ServiceType.Outer);
+            Log.Debug($" { self.Scene().SceneType}, {address}, {protocol}, {ServiceType.Outer}");
             self.AService.AcceptCallback = self.OnAccept;
             self.AService.ReadCallback = self.OnRead;
             self.AService.ErrorCallback = self.OnError;
@@ -74,7 +75,7 @@ namespace ET
             
             (ActorId _, object message) = MessageSerializeHelper.ToMessage(self.AService, memoryBuffer);
             
-            LogMsg.Instance.Debug(self.Fiber(), message);
+            LogMsg.Instance.Recv(self.Fiber(), message);
             
             EventSystem.Instance.Invoke((long)self.IScene.SceneType, new NetComponentOnRead() {Session = session, Message = message});
         }
@@ -103,6 +104,7 @@ namespace ET
             {
                 session.AddComponent<SessionIdleCheckerComponent>();
             }
+            //看不懂，为什么跑到了kservice里去了，而不是TService里去
             self.AService.Create(session.Id, routerIPEndPoint);
             return session;
         }

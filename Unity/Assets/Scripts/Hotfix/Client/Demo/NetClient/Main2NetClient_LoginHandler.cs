@@ -17,6 +17,8 @@ namespace ET.Client
             RouterAddressComponent routerAddressComponent =
                     root.AddComponent<RouterAddressComponent, string, int>(ConstValue.RouterHttpHost, ConstValue.RouterHttpPort);
             await routerAddressComponent.Init();
+            //看不懂，为什么是UDP
+            //创建和router的连接,KCP里包含TCP,和UDP模式
             root.AddComponent<NetComponent, AddressFamily, NetworkProtocol>(routerAddressComponent.RouterManagerIPAddress.AddressFamily, NetworkProtocol.UDP);
             root.GetComponent<FiberParentComponent>().ParentFiberId = request.OwnerFiberId;
 
@@ -25,18 +27,26 @@ namespace ET.Client
             IPEndPoint realmAddress = routerAddressComponent.GetRealmAddress(account);
 
             R2C_Login r2CLogin;
+            // 创建一个router Session,包括连接，并且保存到SessionComponent中
             using (Session session = await netComponent.CreateRouterSession(realmAddress, account, password))
             {
+                //这个消息通过router 走向realm server
                 C2R_Login c2RLogin = C2R_Login.Create();
                 c2RLogin.Account = account;
                 c2RLogin.Password = password;
                 r2CLogin = (R2C_Login)await session.Call(c2RLogin);
             }
+            if (r2CLogin.Error!= ErrorCode.ERR_Success)
+            {
+                response.Error=r2CLogin.Error;
+                return;
+            }
 
-            // 创建一个gate Session,并且保存到SessionComponent中
+            // 创建一个gate Session,并且保存到SessionComponent中,还是通过router去连接gate
             Session gateSession = await netComponent.CreateRouterSession(NetworkHelper.ToIPEndPoint(r2CLogin.Address), account, password);
             gateSession.AddComponent<ClientSessionErrorComponent>();
             root.AddComponent<SessionComponent>().Session = gateSession;
+            //发起登录请求
             C2G_LoginGate c2GLoginGate = C2G_LoginGate.Create();
             c2GLoginGate.Key = r2CLogin.Key;
             c2GLoginGate.GateId = r2CLogin.GateId;

@@ -3,6 +3,9 @@ namespace ET
     public static partial class ErrorCode
     {
         public const int ERR_Success = 0;
+        public const  int ERR_LoinInfoEmpty = 200002;
+
+        public const  int ERR_LoginPasswordError = 200003;
 
         // 1-11004 是SocketError请看SocketError定义
         //-----------------------------------

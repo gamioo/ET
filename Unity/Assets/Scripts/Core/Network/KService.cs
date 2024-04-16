@@ -340,7 +340,7 @@ namespace ET
                             kChannel = this.Get(localConn);
                             if (kChannel != null)
                             {
-                                Log.Info($"kservice ack: {localConn} {remoteConn}");
+                              Log.Info($"kservice ack: localConn:{localConn} remoteConn:{remoteConn}");
                                 kChannel.RemoteConn = remoteConn;
                                 kChannel.HandleConnnect();
                             }
@@ -449,7 +449,7 @@ namespace ET
 
             kChannel.Error = error;
             
-            Log.Debug($"kservice remove channel: {id} {kChannel.LocalConn} {kChannel.RemoteConn} {error}");
+            Log.Debug($"kservice remove channel: id:{id} localConn:{kChannel.LocalConn} remoteConn:{kChannel.RemoteConn} {error}");
             this.localConnChannels.Remove(kChannel.LocalConn);
             if (this.waitAcceptChannels.TryGetValue(kChannel.RemoteConn, out KChannel waitChannel))
             {
@@ -487,7 +487,7 @@ namespace ET
                 Log.Error($"Disconnect error {localConn} {remoteConn} {error} {address} {e}");
             }
             
-            Log.Info($"channel send fin: {localConn} {remoteConn} {address} {error}");
+            Log.Info($"channel send fin: localConn:{localConn} remoteConn:{remoteConn} address:{address} {error}");
         }
         
         public override void Send(long channelId, MemoryBuffer memoryBuffer)

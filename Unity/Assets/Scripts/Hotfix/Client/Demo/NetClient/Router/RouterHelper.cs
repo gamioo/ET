@@ -16,8 +16,8 @@ namespace ET.Client
                 throw new Exception($"get router fail: {netComponent.Root().Id} {address}");
             }
             
-            Log.Info($"get router: {recvLocalConn} {routerAddress}");
-
+            Log.Info($"get random router: recvLocalConn:{recvLocalConn} routerAddress:{routerAddress}");
+            //router连接可以重用
             Session routerSession = netComponent.Create(routerAddress, address, recvLocalConn);
             routerSession.AddComponent<PingComponent>();
             routerSession.AddComponent<RouterCheckComponent>();
@@ -27,14 +27,14 @@ namespace ET.Client
         
         public static async ETTask<(uint, IPEndPoint)> GetRouterAddress(this NetComponent netComponent, IPEndPoint address, uint localConn, uint remoteConn)
         {
-            Log.Info($"start get router address: {netComponent.Root().Id} {address} {localConn} {remoteConn}");
+            Log.Info($"start get router address: id:{netComponent.Root().Id} address:{address} localConn:{localConn} remoteConn:{remoteConn}");
             //return (RandomHelper.RandUInt32(), address);
             RouterAddressComponent routerAddressComponent = netComponent.Root().GetComponent<RouterAddressComponent>();
             IPEndPoint routerInfo = routerAddressComponent.GetAddress();
             
             uint recvLocalConn = await netComponent.Connect(routerInfo, address, localConn, remoteConn);
             
-            Log.Info($"finish get router address: {netComponent.Root().Id} {address} {localConn} {remoteConn} {recvLocalConn} {routerInfo}");
+            Log.Info($"finish get router address: id:{netComponent.Root().Id} address:{address} localConn:{localConn} remoteConn:{remoteConn} recvLocalConn:{recvLocalConn} routerInfo:{routerInfo}");
             return (recvLocalConn, routerInfo);
         }
 
@@ -58,8 +58,7 @@ namespace ET.Client
             byte[] addressBytes = realAddress.ToString().ToByteArray();
             Array.Copy(addressBytes, 0, sendCache, 13, addressBytes.Length);
             TimerComponent timerComponent = netComponent.Root().GetComponent<TimerComponent>();
-            Log.Info($"router connect: {localConn} {remoteConn} {routerAddress} {realAddress}");
-
+            Log.Info($"router connect,local:{localConn} remote:{remoteConn} router:{routerAddress} real:{realAddress}");
             long lastSendTimer = 0;
 
             while (true)

@@ -70,9 +70,8 @@ namespace ET
 			this.LocalConn = localConn;
 			this.ChannelType = ChannelType.Connect;
 			
-			Log.Info($"channel create: {this.LocalConn} {remoteEndPoint} {this.ChannelType}");
-			
-			
+			Log.Info($"channel create: localConn:{this.LocalConn} {remoteEndPoint} channelType:{this.ChannelType}");
+
 			this.RemoteAddress = remoteEndPoint;
 			this.CreateTime = kService.TimeNow;
 
@@ -86,7 +85,7 @@ namespace ET
 			this.Service = kService;
 			this.ChannelType = ChannelType.Accept;
 			
-			Log.Info($"channel create: {localConn} {remoteConn} {remoteEndPoint} {this.ChannelType}");
+			Log.Info($"channel create: localConn:{localConn} remoteConn:{remoteConn} {remoteEndPoint} channelType:{this.ChannelType}");
 			this.LocalConn = localConn;
 			this.RemoteConn = remoteConn;
 			this.RemoteAddress = remoteEndPoint;
@@ -106,8 +105,8 @@ namespace ET
 
 			uint localConn = this.LocalConn;
 			uint remoteConn = this.RemoteConn;
-			Log.Info($"channel dispose: {localConn} {remoteConn} {this.Error}");
-			
+			Log.Info($"channel dispose: localConn:{localConn} remoteConn:{remoteConn} error:{this.Error}");
+
 			long id = this.Id;
 			this.Id = 0;
 			this.Service.Remove(id);
@@ -138,7 +137,7 @@ namespace ET
 			this.kcp = new Kcp(this.RemoteConn, this.Output);
 			this.InitKcp();
 
-			Log.Info($"channel connected: {this.LocalConn} {this.RemoteConn} {this.RemoteAddress}");
+			Log.Info($"channel connected: LocalConn:{this.LocalConn} RemoteConn:{this.RemoteConn} RemoteAddress:{this.RemoteAddress}");
 			this.IsConnected = true;
 			
 			while (true)
@@ -188,7 +187,7 @@ namespace ET
 				buffer.WriteTo(5, this.RemoteConn);
 				this.Service.Transport.Send(buffer, 0, 9, this.RemoteAddress);
 				// 这里很奇怪 调用socket.LocalEndPoint会动到this.RemoteAddressNonAlloc里面的temp，这里就不仔细研究了
-				Log.Info($"kchannel connect {this.LocalConn} {this.RemoteConn} {this.RealAddress}");
+				Log.Info($"kchannel connect localConn:{this.LocalConn} remoteConn:{this.RemoteConn} realAddress:{this.RealAddress}");
 
 				this.lastConnectTime = timeNow;
 

@@ -2,6 +2,7 @@
 
 namespace ET
 {
+    /**对消息的打印*/
     public class LogMsg: Singleton<LogMsg>, ISingletonAwake
     {
         private readonly HashSet<ushort> ignore = new()
@@ -16,14 +17,25 @@ namespace ET
         {
         }
 
-        public void Debug(Fiber fiber, object msg)
+        public void Recv(Fiber fiber, object msg)
         {
             ushort opcode = OpcodeType.Instance.GetOpcode(msg.GetType());
             if (this.ignore.Contains(opcode))
             {
                 return;
             }
-            fiber.Log.Debug(msg.ToString());
+            Log.Debug($"recv type:{opcode},name:{msg.GetType()},args:{msg}");
+            fiber.Log.Trace(msg.ToString());
+        }
+        public void Send(Fiber fiber, object msg)
+        {
+            ushort opcode = OpcodeType.Instance.GetOpcode(msg.GetType());
+            if (this.ignore.Contains(opcode))
+            {
+                return;
+            }
+            Log.Debug($"send type:{opcode},name:{msg.GetType()},args:{msg}");
+           fiber.Log.Trace(msg.ToString());
         }
     }
 }

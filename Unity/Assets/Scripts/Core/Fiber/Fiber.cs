@@ -84,7 +84,7 @@ namespace ET
             {
                 this.EntitySystem.LateUpdate();
                 FrameFinishUpdate();
-                
+                //看不懂,为什么不放到上面的update里
                 this.ThreadSynchronizationContext.Update();
             }
             catch (Exception e)

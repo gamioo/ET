@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Net;
-
+using System.Collections.Generic;
 
 namespace ET.Server
 {
@@ -9,6 +9,40 @@ namespace ET.Server
 	{
 		protected override async ETTask Run(Session session, C2R_Login request, R2C_Login response)
 		{
+			if (string.IsNullOrEmpty(request.Account) || string.IsNullOrEmpty(request.Password))
+			{
+				response.Error = ErrorCode.ERR_LoinInfoEmpty;
+				CloseSession(session).Coroutine();
+				return;
+			}
+
+			using (await session.Root().GetComponent<CoroutineLockComponent>()
+					       .Wait(CoroutineLockType.LoginAccount, request.Account.GetLongHashCode()))
+			{
+				DBComponent dbComponent = session.Root().GetComponent<DBManagerComponent>().GetZoneDB(session.Zone());
+				List<AccountInfo> list = await dbComponent.Query<AccountInfo>(info => info.Account == request.Account);
+
+				if (list.Count == 0)
+				{
+					AccountInfosComponent accountInfosComponent =
+							session.GetComponent<AccountInfosComponent>() ?? session.AddComponent<AccountInfosComponent>();
+					AccountInfo accountInfo = accountInfosComponent.AddChild<AccountInfo>();
+					accountInfo.Account = request.Account;
+					accountInfo.Password = request.Password;
+
+					await dbComponent.Save(accountInfo);
+				}
+				else
+				{
+					AccountInfo info = list[0];
+					if (info.Password != request.Password)
+					{
+						response.Error = ErrorCode.ERR_LoginPasswordError;
+						CloseSession(session).Coroutine();
+						return;
+					}
+				}
+			}
 			// 随机分配一个Gate
 			StartSceneConfig config = RealmGateAddressHelper.GetGate(session.Zone(), request.Account);
 			Log.Debug($"gate address: {config}");
