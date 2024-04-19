@@ -11,7 +11,7 @@ namespace ET.Server
 		{
 			if (string.IsNullOrEmpty(request.Account) || string.IsNullOrEmpty(request.Password))
 			{
-				response.Error = ErrorCode.ERR_LoinInfoEmpty;
+				response.Error = ErrorCode.ERR_LoginInfoIsNull;
 				CloseSession(session).Coroutine();
 				return;
 			}

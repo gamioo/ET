@@ -58,7 +58,12 @@ namespace ET
         {
             return ClientNow() + this.ServerMinusClientTime;
         }
-        
+
+        public DateTime Now()
+        {
+            return ToDateTime(ServerNow());
+        }
+
         public long ClientFrameTime()
         {
             return this.FrameTime;

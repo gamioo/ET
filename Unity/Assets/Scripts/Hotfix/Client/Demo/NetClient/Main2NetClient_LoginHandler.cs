@@ -26,35 +26,40 @@ namespace ET.Client
             
             IPEndPoint realmAddress = routerAddressComponent.GetRealmAddress(account);
 
-            R2C_Login r2CLogin;
+
             // 创建一个router Session,包括连接，并且保存到SessionComponent中
-            using (Session session = await netComponent.CreateRouterSession(realmAddress, account, password))
-            {
+            Session session = await netComponent.CreateRouterSession(realmAddress, account, password);
+
                 //这个消息通过router 走向realm server
-                C2R_Login c2RLogin = C2R_Login.Create();
+                C2R_LoginAccount c2RLogin = C2R_LoginAccount.Create();
                 c2RLogin.Account = account;
                 c2RLogin.Password = password;
-                r2CLogin = (R2C_Login)await session.Call(c2RLogin);
-            }
-            if (r2CLogin.Error!= ErrorCode.ERR_Success)
+                R2C_LoginAccount   r2CLogin = (R2C_LoginAccount)await session.Call(c2RLogin);
+
+            if (r2CLogin.Error== ErrorCode.ERR_Success)
             {
-                response.Error=r2CLogin.Error;
-                return;
+                root.AddComponent<SessionComponent>().Session = session;
+            }
+            else
+            {
+                session?.Dispose();
             }
 
-            // 创建一个gate Session,并且保存到SessionComponent中,还是通过router去连接gate
-            Session gateSession = await netComponent.CreateRouterSession(NetworkHelper.ToIPEndPoint(r2CLogin.Address), account, password);
-            gateSession.AddComponent<ClientSessionErrorComponent>();
-            root.AddComponent<SessionComponent>().Session = gateSession;
-            //发起登录请求
-            C2G_LoginGate c2GLoginGate = C2G_LoginGate.Create();
-            c2GLoginGate.Key = r2CLogin.Key;
-            c2GLoginGate.GateId = r2CLogin.GateId;
-            G2C_LoginGate g2CLoginGate = (G2C_LoginGate)await gateSession.Call(c2GLoginGate);
-
-            Log.Debug("登陆gate成功!");
-
-            response.PlayerId = g2CLoginGate.PlayerId;
+            response.Token=r2CLogin.Token;
+            response.Error=r2CLogin.Error;
+            // // 创建一个gate Session,并且保存到SessionComponent中,还是通过router去连接gate
+            // Session gateSession = await netComponent.CreateRouterSession(NetworkHelper.ToIPEndPoint(r2CLogin.Address), account, password);
+            // gateSession.AddComponent<ClientSessionErrorComponent>();
+            // root.AddComponent<SessionComponent>().Session = gateSession;
+            // //发起登录请求
+            // C2G_LoginGate c2GLoginGate = C2G_LoginGate.Create();
+            // c2GLoginGate.Key = r2CLogin.Key;
+            // c2GLoginGate.GateId = r2CLogin.GateId;
+            // G2C_LoginGate g2CLoginGate = (G2C_LoginGate)await gateSession.Call(c2GLoginGate);
+            //
+            // Log.Debug("登陆gate成功!");
+            //
+            // response.PlayerId = g2CLoginGate.PlayerId;
         }
     }
 }
