@@ -19,14 +19,14 @@ namespace ET.Server
                 return;
             }
 
-            if (string.IsNullOrEmpty(request.Account) || string.IsNullOrEmpty(request.Password))
+            if (string.IsNullOrEmpty(request.AccountName) || string.IsNullOrEmpty(request.Password))
             {
                 response.Error = ErrorCode.ERR_LoginInfoIsNull;
                 session.Disconnect().Coroutine();
                 return;
             }
 
-            if (!Regex.IsMatch(request.Account.Trim(), @"^(?=,*[0-9].*)(?=,*[A-Z].*)(?=,*[a-z].*).{6,15}$"))
+            if (!Regex.IsMatch(request.AccountName.Trim(), "^[A-Za-z0-9]$"))
             {
                 response.Error = ErrorCode.ERR_AccountNameFormError;
                 session.Disconnect().Coroutine();
@@ -43,15 +43,15 @@ namespace ET.Server
             CoroutineLockComponent coroutineLockComponent = session.Root().GetComponent<CoroutineLockComponent>();
             using (session.AddComponent<SessionLockingComponent>())
             {
-                using (await coroutineLockComponent.Wait(CoroutineLockType.LoginAccount, request.Account.GetLongHashCode()))
+                using (await coroutineLockComponent.Wait(CoroutineLockType.LoginAccount, request.AccountName.GetLongHashCode()))
                 {
                     DBComponent dbComponent = session.Root().GetComponent<DBManagerComponent>().GetZoneDB(session.Zone());
-                    List<Account> list = await dbComponent.Query<Account>(entity => entity.AccountName == request.Account);
+                    List<Account> list = await dbComponent.Query<Account>(entity => entity.AccountName == request.AccountName);
                     Account account = null;
                     if (list.Count == 0)
                     {
                         account = session.AddChild<Account>();
-                        account.AccountName = request.Account.Trim();
+                        account.AccountName = request.AccountName.Trim();
                         account.Password = request.Password;
                         account.AddTime = TimeInfo.Instance.Now();
                         account.AccountType = AccountType.GENERAL;
@@ -82,7 +82,7 @@ namespace ET.Server
                     account.LastLoginIp = session.RemoteAddress.ToString();
                     await dbComponent.Save(account);
                     R2L_LoginAccountRequest r2LLoginAccountRequest = R2L_LoginAccountRequest.Create();
-                    r2LLoginAccountRequest.AccountName = request.Account;
+                    r2LLoginAccountRequest.AccountName = request.AccountName;
                     StartSceneConfig loginCenterConfig = StartSceneConfigCategory.Instance.LoginCenterConfig;
                     L2R_LoginAccountRequest loginAccountResponse =
                             await session.Fiber().Root.GetComponent<MessageSender>().Call(loginCenterConfig.ActorId, r2LLoginAccountRequest) as
@@ -96,14 +96,16 @@ namespace ET.Server
                         return;
                     }
 
-                    Session otherSession = session.Root().GetComponent<AccountSessionsComponent>().Get(request.Account);
+                    Session otherSession = session.Root().GetComponent<AccountSessionsComponent>().Get(request.AccountName);
                     otherSession?.Send(A2C_Disconnect.Create());
                     otherSession?.Disconnect().Coroutine();
-                    session.Root().GetComponent<AccountSessionsComponent>().Add(request.Account, session);
-                    session.AddComponent<AccountCheckOutTimeComponent, string>(request.Account);
+                    session.Root().GetComponent<AccountSessionsComponent>().Add(request.AccountName, session);
+                    session.AddComponent<AccountCheckOutTimeComponent, string>(request.AccountName);
                     string Token = TimeInfo.Instance.ServerNow().ToString() + RandomGenerator.RandomNumber(int.MinValue, int.MaxValue);
-                    session.Root().GetComponent<TokenComponent>().Remove(request.Account);
-                    session.Root().GetComponent<TokenComponent>().Add(request.Account, Token);
+                    session.Root().GetComponent<TokenComponent>().Remove(request.AccountName);
+                    session.Root().GetComponent<TokenComponent>().Add(request.AccountName, Token);
+                    response.Token = Token;
+                    account?.Dispose();
                 }
             }
         }

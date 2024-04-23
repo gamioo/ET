@@ -68,11 +68,11 @@ namespace ET
                     case SceneType.Match:
                         this.Match = startSceneConfig;
                         break;
-                    case SceneType.LoginCenter:
-                        this.LocationConfig = startSceneConfig;
-                        break;
                     case SceneType.BenchmarkServer:
                         this.Benchmark = startSceneConfig;
+                        break;
+                    case SceneType.LoginCenter:
+                        this.LocationConfig = startSceneConfig;
                         break;
                 }
             }

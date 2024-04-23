@@ -32,7 +32,7 @@ namespace ET.Client
 
                 //这个消息通过router 走向realm server
                 C2R_LoginAccount c2RLogin = C2R_LoginAccount.Create();
-                c2RLogin.Account = account;
+                c2RLogin.AccountName = account;
                 c2RLogin.Password = password;
                 R2C_LoginAccount   r2CLogin = (R2C_LoginAccount)await session.Call(c2RLogin);
 
