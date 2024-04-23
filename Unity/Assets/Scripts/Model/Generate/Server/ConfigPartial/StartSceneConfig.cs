@@ -72,7 +72,7 @@ namespace ET
                         this.Benchmark = startSceneConfig;
                         break;
                     case SceneType.LoginCenter:
-                        this.LocationConfig = startSceneConfig;
+                        this.LoginCenterConfig = startSceneConfig;
                         break;
                 }
             }

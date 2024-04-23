@@ -84,8 +84,9 @@ namespace ET.Server
                     R2L_LoginAccountRequest r2LLoginAccountRequest = R2L_LoginAccountRequest.Create();
                     r2LLoginAccountRequest.AccountName = request.AccountName;
                     StartSceneConfig loginCenterConfig = StartSceneConfigCategory.Instance.LoginCenterConfig;
+                    MessageSender messageSender = session.Fiber().Root.GetComponent<MessageSender>();
                     L2R_LoginAccountRequest loginAccountResponse =
-                            await session.Fiber().Root.GetComponent<MessageSender>().Call(loginCenterConfig.ActorId, r2LLoginAccountRequest) as
+                            await messageSender.Call(loginCenterConfig.ActorId, r2LLoginAccountRequest) as
                                     L2R_LoginAccountRequest;
 
                     if (loginAccountResponse.Error != ErrorCode.ERR_Success)
